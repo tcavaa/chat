@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-
 const socket = io('https://server.rretrocar.ge');
 
 function App() {
@@ -9,14 +8,27 @@ function App() {
   const [input, setInput] = useState('');
 
   useEffect(() => {
+    // Fetch initial chat history
     fetch('https://server.rretrocar.ge/messages')
-      .then(res => res.json())
-      .then(data => setMessages(data));
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch messages');
+        return res.json();
+      })
+      .then((data) => setMessages(data))
+      .catch((error) => console.error('Error fetching messages:', error));
 
+    // Handle real-time messages
     socket.on('chat message', (data) => {
-      setMessages((prev) => [...prev, data]);
+      setMessages((prev) => {
+        // Avoid duplicates by checking if message ID already exists
+        if (prev.some((msg) => msg.id === data.id)) {
+          return prev;
+        }
+        return [...prev, data];
+      });
     });
 
+    // Cleanup socket listener
     return () => socket.off('chat message');
   }, []);
 
@@ -31,8 +43,8 @@ function App() {
     <div className="terminal-container">
       <h1 className="terminal-header">TERMINAL v1.0</h1>
       <div className="terminal-box">
-        {messages.map((msg, i) => (
-          <div key={i} className="terminal-message">
+        {messages.map((msg) => (
+          <div key={msg.id} className="terminal-message">
             <span className="terminal-ip">{msg.ip}:</span> {msg.message}
           </div>
         ))}
@@ -45,10 +57,7 @@ function App() {
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
           placeholder="Type your message..."
         />
-        <button
-          className="terminal-button"
-          onClick={sendMessage}
-        >
+        <button className="terminal-button" onClick={sendMessage}>
           Send
         </button>
       </div>
