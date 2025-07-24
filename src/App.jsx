@@ -17,11 +17,18 @@ function App() {
 
   // listen for typing
   useEffect(() => {
-    socket.on('typing', (nickname) => {
-      setTypingUser(nickname);
-      setTimeout(() => setTypingUser(null), 1500); // clear after delay
-    });
-  }, []);
+  const handleTypingEvent = (nickname) => {
+    setTypingUser(nickname);
+    setTimeout(() => setTypingUser(null), 1500); // fade out after 1.5s
+  };
+
+  socket.on('typing', handleTypingEvent);
+
+  // ✅ Cleanup to prevent multiple listeners
+  return () => {
+    socket.off('typing', handleTypingEvent);
+  };
+}, []);
 
   useEffect(() => {
     // Fetch initial chat history
@@ -66,7 +73,7 @@ function App() {
         ))}
   
         {typingUser && (
-          <div className="text-green-700 animate-pulse text-sm">{typingUser} is typing...</div>
+          <div className="typing-indicator">{typingUser} is typing...</div>
         )}
 
       </div>
