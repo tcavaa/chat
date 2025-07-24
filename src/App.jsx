@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const socket = io('https://server.rretrocar.ge');
+const socket = io('http://server.rretrocar.ge');
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -19,12 +19,12 @@ function App() {
   useEffect(() => {
   const handleTypingEvent = (nickname) => {
     setTypingUser(nickname);
-    setTimeout(() => setTypingUser(null), 1500); // fade out after 1.5s
+    setTimeout(() => setTypingUser(null), 4500); // fade out after 1.5s
   };
 
   socket.on('typing', handleTypingEvent);
 
-  // ✅ Cleanup to prevent multiple listeners
+  // Cleanup to prevent multiple listeners
   return () => {
     socket.off('typing', handleTypingEvent);
   };
