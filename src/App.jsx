@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-const socket = io('http://server.rretrocar.ge');
+const socket = io('https://server.rretrocar.ge');
 
 function App() {
   const [messages, setMessages] = useState([]);
