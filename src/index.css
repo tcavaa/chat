@@ -76,3 +76,18 @@ body {
   background-color: #00ff00;
   color: #000;
 }
+
+.typing-indicator {
+  color: #00ff00; /* same as your green */
+  font-size: 0.875rem; /* equivalent to Tailwind's text-sm (14px) */
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

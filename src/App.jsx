@@ -7,6 +7,22 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
 
+  // state
+  const [typingUser, setTypingUser] = useState(null);
+
+  // handle input
+  const handleTyping = () => {
+    socket.emit('typing');
+  };  
+
+  // listen for typing
+  useEffect(() => {
+    socket.on('typing', (nickname) => {
+      setTypingUser(nickname);
+      setTimeout(() => setTypingUser(null), 1500); // clear after delay
+    });
+  }, []);
+
   useEffect(() => {
     // Fetch initial chat history
     fetch('https://server.rretrocar.ge/messages')
@@ -48,12 +64,20 @@ function App() {
             <span className="terminal-ip">{msg.ip}:</span> {msg.message}
           </div>
         ))}
+  
+        {typingUser && (
+          <div className="text-green-700 animate-pulse text-sm">{typingUser} is typing...</div>
+        )}
+
       </div>
       <div className="terminal-input-box">
         <input
           className="terminal-input"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value)
+            handleTyping();
+          }}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
           placeholder="Type your message..."
         />
