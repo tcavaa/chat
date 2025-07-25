@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { formatDistanceToNow } from 'date-fns';
 
 const socket = io('https://server.rretrocar.ge');
 
 function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-
-  // state
+  const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUser, setTypingUser] = useState(null);
+
+  useEffect(() => {
+  const handleOnlineUsers = (users) => {
+    setOnlineUsers(users);
+  };
+
+  socket.on('online users', handleOnlineUsers);
+
+  return () => {
+    socket.off('online users', handleOnlineUsers);
+  };
+}, []);
 
   // handle input
   const handleTyping = () => {
@@ -55,6 +67,21 @@ function App() {
     return () => socket.off('chat message');
   }, []);
 
+  useEffect(() => {
+  const interval = setInterval(() => {
+    const oneMinuteAgo = Date.now() - 60 * 1000;
+
+    setMessages((prev) =>
+      prev.filter((msg) => {
+        const msgTime = new Date(msg.timestamp).getTime();
+        return msgTime > oneMinuteAgo;
+      })
+    );
+  }, 5000); // check every 5 seconds
+
+  return () => clearInterval(interval);
+}, []);
+
   const sendMessage = () => {
     if (input.trim()) {
       socket.emit('chat message', input);
@@ -65,11 +92,33 @@ function App() {
   return (
     <div className="terminal-container">
       <h1 className="terminal-header">TERMINAL v1.0</h1>
+      <div className="online-users">
+        <strong>Online:</strong>{' '}
+        {onlineUsers.length > 0 ? onlineUsers.join(', ') : 'No users'}
+      </div>
       <div className="terminal-box">
         {messages.map((msg) => (
-          <div key={msg.id} className="terminal-message">
-            <span className="terminal-ip">{msg.ip}:</span> {msg.message}
+          <div key={msg.id} 
+            className={`terminal-message ${
+              msg.type === 'system' ? 'system-message' : ''
+            }`}
+          >
+            {msg.type === 'system' ? (
+      <em>{msg.message}</em>
+    ) : (
+      <>
+        <div>
+          <span className="terminal-ip">{msg.ip}:</span> {msg.message}
+        </div>
+        <div className="timestamp">
+          &nbsp;:{formatDistanceToNow(new Date(msg.timestamp), {
+            addSuffix: true,
+          })}
+        </div>
+      </>
+    )}
           </div>
+          
         ))}
   
         {typingUser && (

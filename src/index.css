@@ -40,6 +40,7 @@ body {
   margin: 10px 0;
   white-space: pre-wrap;
   word-break: break-word;
+  display: flex;
 }
 
 .terminal-ip {
@@ -90,4 +91,18 @@ body {
   50% {
     opacity: 0.4;
   }
+}
+
+.system-message {
+  color: gray;
+  font-style: italic;
+  text-align: center;
+}
+
+.online-users {
+  background-color: #111;
+  color: lightgreen;
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #333;
 }
